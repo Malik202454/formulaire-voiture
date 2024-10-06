@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Réservation de Véhicules</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #eaeaea;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        header {
+            background-color: rgba(76, 175, 80, 0.9);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: rgba(76, 175, 80, 0.9);
+            color: white;
+        }
+        .rouge { background-color: #ffcccc; }
+        .bleu { background-color: #ccddff; }
+        .vert { background-color: #ccffcc; }
+        .noir { background-color: #d9d9d9; }
+        .blanc { background-color: #ffffff; }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #message {
+            margin-top: 10px;
+            color: #d9534f;
+        }
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            margin: auto;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .pagination button {
+            padding: 5px 10px;
+            margin: 0 2px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .pagination button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .details {
+            cursor: pointer;
+            color: #007BFF;
+            text-decoration: underline;
+        }
+        .details-content {
+            display: none;
+            margin-top: 10px;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        .vehicle-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-right: 5px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Système de Réservation de Véhicules</h1>
+</header>
+
+<form id="reservationForm">
+    <div class="form-group">
+        <label for="educator">Sélectionnez votre éducateur :</label>
+        <select id="educator" required>
+            <option value="">--Choisir un éducateur--</option>
+            <option value="Educateur 1">Éducateur 1</option>
+            <option value="Educateur 2">Éducateur 2</option>
+            <option value="Educateur 3">Éducateur 3</option>
+            <option value="Educateur 4">Éducateur 4</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Choisissez les véhicules :</label><br>
+        <label><span class="vehicle-icon" style="background-color: #ffcccc;"></span><input type="checkbox" name="vehicle" value="Rouge"> Rouge</label><br>
+        <label><span class="vehicle-icon" style="background-color: #ccddff;"></span><input type="checkbox" name="vehicle" value="Bleu"> Bleu</label><br>
+        <label><span class="vehicle-icon" style="background-color: #ccffcc;"></span><input type="checkbox" name="vehicle" value="Vert"> Vert</label><br>
+        <label><span class="vehicle-icon" style="background-color: #d9d9d9;"></span><input type="checkbox" name="vehicle" value="Noir"> Noir</label><br>
+        <label><span class="vehicle-icon" style="background-color: #ffffff;"></span><input type="checkbox" name="vehicle" value="Blanc"> Blanc</label>
+    </div>
+
+    <div class="form-group">
+        <label for="date">Date de réservation :</label>
+        <input type="date" id="date" required>
+    </div>
+
+    <div class="form-group">
+        <label>Heure de début :</label>
+        <input type="range" id="startHour" min="0" max="23" value="9" oninput="updateHourLabel('startHour', 'startHourLabel')">
+        <span id="startHourLabel">09</span>:<input type="range" id="startMinute" min="0" max="59" value="0" oninput="updateMinuteLabel('startMinute', 'startMinuteLabel')">
+        <span id="startMinuteLabel">00</span>
+    </div>
+
+    <div class="form-group">
+        <label>Heure de retour :</label>
+        <input type="range" id="endHour" min="0" max="23" value="10" oninput="updateHourLabel('endHour', 'endHourLabel')">
+        <span id="endHourLabel">10</span>:<input type="range" id="endMinute" min="0" max="59" value="0" oninput="updateMinuteLabel('endMinute', 'endMinuteLabel')">
+        <span id="endMinuteLabel">00</span>
+    </div>
+
+    <button type="submit">Réserver</button>
+</form>
+
+<div id="message"></div>
+
+<div class="form-group">
+    <label for="filterDate">Filtrer par date :</label>
+    <input type="date" id="filterDate">
+</div>
+
+<h2 style="background-color: rgba(76, 175, 80, 0.9); padding: 10px; border-radius: 8px; color: white; max-width: 600px; margin: auto; text-align: center;">Réservations Actuelles</h2>
+
+<div class="table-container">
+    <table id="reservationsTable">
+        <thead>
+            <tr>
+                <th>Éducateur</th>
+                <th>Véhicules</th>
+                <th>Date</th>
+                <th>Heure de Début</th>
+                <th>Heure de Retour</th>
+                <th>Détails</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Les réservations seront ajoutées ici -->
+        </tbody>
+    </table>
+</div>
+
+<div class="pagination" id="pagination"></div>
+
+<script>
+    const reservations = [];
+
+    document.getElementById('reservationForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const educator = document.getElementById('educator').value;
+        const vehicles = Array.from(document.querySelectorAll('input[name="vehicle"]:checked')).map(el => el.value);
+        const date = document.getElementById('date').value.split('-').reverse().join('/');
+        const startHour = document.getElementById('startHour').value;
+        const startMinute = document.getElementById('startMinute').value;
+        const endHour = document.getElementById('endHour').value;
+        const endMinute = document.getElementById('endMinute').value;
+
+        if (vehicles.length === 0) {
+            document.getElementById('message').innerText = "Veuillez sélectionner au moins un véhicule.";
+            return;
+        }
+
+        // Créer une réservation
+        const newReservation = {
+            educator: educator,
+            vehicles: vehicles,
+            date: date,
+            startTime: `${startHour.padStart(2, '0')}:${startMinute.padStart(2, '0')}`,
+            endTime: `${endHour.padStart(2, '0')}:${endMinute.padStart(2, '0')}`
+        };
+
+        // Vérification de conflit de réservation
+        if (checkReservationConflict(newReservation)) {
+            document.getElementById('message').innerText = "Conflit de réservation : Veuillez vérifier la date et l'heure.";
+            return;
+        }
+
+        // Si pas de conflit, ajouter la réservation
+        reservations.push(newReservation);
+
+        updateReservationsTable();
+        document.getElementById('reservationForm').reset();
+        document.getElementById('message').innerText = "";
+    });
+
+    function checkReservationConflict(newReservation) {
+        const startTime = new Date(`${newReservation.date} ${newReservation.startTime}`);
+        const endTime = new Date(`${newReservation.date} ${newReservation.endTime}`);
+        
+        return reservations.some(reservation => {
+            const existingStartTime = new Date(`${reservation.date} ${reservation.startTime}`);
+            const existingEndTime = new Date(`${reservation.date} ${reservation.endTime}`);
+            return (existingStartTime < endTime && existingEndTime > startTime);
+        });
+    }
+
+    document.getElementById('filterDate').addEventListener('input', updateReservationsTable);
+
+    let currentPage = 1;
+    const rowsPerPage = 5;
+
+    function updateReservationsTable() {
+        const filterDate = document.getElementById('filterDate').value.split('-').reverse().join('/') || '';
+        const tbody = document.getElementById('reservationsTable').querySelector('tbody');
+        tbody.innerHTML = '';
+
+        const filteredReservations = reservations.filter(reservation => 
+            filterDate === '' || reservation.date === filterDate
+        );
+
+        const totalPages = Math.ceil(filteredReservations.length / rowsPerPage);
+        const startIndex = (currentPage - 1) * rowsPerPage;
+        const endIndex = startIndex + rowsPerPage;
+        const paginatedReservations = filteredReservations.slice(startIndex, endIndex);
+
+        paginatedReservations.forEach(reservation => {
+            const row = tbody.insertRow();
+            row.insertCell(0).innerText = reservation.educator;
+            row.insertCell(1).innerText = reservation.vehicles.join(', ');
+            row.insertCell(2).innerText = reservation.date;
+            row.insertCell(3).innerText = reservation.startTime;
+            row.insertCell(4).innerText = reservation.endTime;
+
+            const detailsCell = row.insertCell(5);
+            detailsCell.innerHTML = `<span class="details">Afficher Détails</span>`;
+            detailsCell.querySelector('.details').onclick = () => showDetails(reservation);
+
+            applyRowStyles(row, reservation);
+        });
+
+        setupPagination(totalPages);
+    }
+
+    function applyRowStyles(row, reservation) {
+        reservation.vehicles.forEach(vehicle => {
+            const vehicleCell = row.cells[1];
+            switch (vehicle) {
+                case 'Rouge':
+                    vehicleCell.classList.add('rouge');
+                    break;
+                case 'Bleu':
+                    vehicleCell.classList.add('bleu');
+                    break;
+                case 'Vert':
+                    vehicleCell.classList.add('vert');
+                    break;
+                case 'Noir':
+                    vehicleCell.classList.add('noir');
+                    break;
+                case 'Blanc':
+                    vehicleCell.classList.add('blanc');
+                    break;
+            }
+        });
+
+        const month = new Date(reservation.date.split('/').reverse().join('-')).getMonth();
+        switch (month) {
+            case 0: row.classList.add('janvier'); break;
+            case 1: row.classList.add('fevrier'); break;
+            case 2: row.classList.add('mars'); break;
+            case 3: row.classList.add('avril'); break;
+            case 4: row.classList.add('mai'); break;
+            case 5: row.classList.add('juin'); break;
+            case 6: row.classList.add('juillet'); break;
+            case 7: row.classList.add('aout'); break;
+            case 8: row.classList.add('septembre'); break;
+            case 9: row.classList.add('octobre'); break;
+            case 10: row.classList.add('novembre'); break;
+            case 11: row.classList.add('decembre'); break;
+        }
+    }
+
+    function setupPagination(totalPages) {
+        const pagination = document.getElementById('pagination');
+        pagination.innerHTML = '';
+
+        for (let i = 1; i <= totalPages; i++) {
+            const button = document.createElement('button');
+            button.innerText = i;
+            button.disabled = (i === currentPage);
+            button.onclick = () => {
+                currentPage = i;
+                updateReservationsTable();
+            };
+            pagination.appendChild(button);
+        }
+    }
+
+    function showDetails(reservation) {
+        const detailsContainer = document.createElement('div');
+        detailsContainer.className = 'details-content';
+        detailsContainer.innerHTML = `\
+            <strong>Détails de la réservation:</strong><br>\
+            Éducateur: ${reservation.educator}<br>\
+            Véhicules: ${reservation.vehicles.join(', ')}<br>\
+            Date: ${reservation.date}<br>\
+            Heure de Début: ${reservation.startTime}<br>\
+            Heure de Retour: ${reservation.endTime}
+        `;
+        document.body.appendChild(detailsContainer);
+        detailsContainer.style.display = 'block';
+        setTimeout(() => {
+            detailsContainer.remove();
+        }, 5000);
+    }
+
+    function updateHourLabel(hourId, labelId) {
+        const hourValue = document.getElementById(hourId).value;
+        document.getElementById(labelId).innerText = hourValue.padStart(2, '0');
+    }
+
+    function updateMinuteLabel(minuteId, labelId) {
+        const minuteValue = document.getElementById(minuteId).value;
+        document.getElementById(labelId).innerText = minuteValue.padStart(2, '0');
+    }
+</script>
+</body>
+</html>
